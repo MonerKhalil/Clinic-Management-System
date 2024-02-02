@@ -29,8 +29,8 @@ class User extends BaseModel implements AuthenticatableContract,AuthorizableCont
      * @var array<int, string>
      */
     protected $fillable = [
-        'name','first_name','last_name',
-        'image','role','is_active','created_by','updated_by',
+        'first_name','last_name',
+        'role','is_active','created_by','updated_by',
         'token_reset_password_api',
         'email','email_verified_at',
         'password','token_reset_password_api'
@@ -58,5 +58,9 @@ class User extends BaseModel implements AuthenticatableContract,AuthorizableCont
     public function setPasswordAttribute($password)
     {
         $this->attributes['password'] = Hash::make($password);
+    }
+
+    public function setNameAttribute($value){
+        $this->attributes['name'] = $this->first_name . ' ' . $this->last_name;
     }
 }

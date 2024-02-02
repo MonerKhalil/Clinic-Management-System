@@ -17,8 +17,7 @@ class UserProfileRequest extends BaseRequest
         return [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'email' => 'required|email|unique:users,email,' . MyApp::Classes()->getUser()->id,
-            'png_image' => $this->imageRule(false),
+            'email' => 'required|email|unique:users,email,' . user()->id,
         ];
     }
 }

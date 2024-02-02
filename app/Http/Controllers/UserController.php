@@ -10,6 +10,7 @@ use App\Http\Requests\UserProfileRequest;
 use App\Http\Requests\UserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
@@ -64,9 +65,16 @@ class UserController extends Controller
      */
     public function store(UserRequest $request)
     {
-        $result = $this->IUserRepository->create($request->validated());
-
-        return $this->responseSuccess(null,  compact("result"));
+        try {
+            DB::beginTransaction();
+            $result = $this->IUserRepository->create($request->validated());
+            $result->attachRole($request->role);
+            DB::commit();
+            return $this->responseSuccess(null,  compact("result"));
+        }catch (\Exception $exception){
+            DB::rollBack();
+            throw new MainException($exception->getMessage());
+        }
     }
 
     /**
@@ -108,9 +116,16 @@ class UserController extends Controller
      */
     public function update(UserRequest $request, User $user)
     {
-        $result = $this->IUserRepository->update($request->validated() ,$user->id);
-
-        return $this->responseSuccess(null,  compact("result"));
+        try {
+            DB::beginTransaction();
+            $result = $this->IUserRepository->update($request->validated() ,$user->id);
+            $result->syncRoles($request->role);
+            DB::commit();
+            return $this->responseSuccess(null,  compact("result"));
+        }catch (\Exception $exception){
+            DB::rollBack();
+            throw new MainException($exception->getMessage());
+        }
     }
 
     /**
@@ -167,12 +182,12 @@ class UserController extends Controller
     ######################### PROFILE USER #########################
 
     public function showProfileUser(){
-        $user = MyApp::Classes()->getUser();
+        $user = \user();
         return $this->responseSuccess(null,compact("user"));
     }
 
     public function editProfileUser(UserProfileRequest $request){
-        $user = MyApp::Classes()->getUser();
+        $user = \user();
 
         $data = $request->validated();
 

@@ -37,12 +37,19 @@ class MyApp
      */
     public ?LogMain $logMain = null;
 
+    /**
+     * @var StringProcess|null
+     * @author moner khalil
+     */
+    public ?StringProcess $stringProcess = null;
+
     private function __construct()
     {
         $this->json = new Json();
         $this->logMain = new LogMain();
         $this->Search = new SearchModel();
         $this->storageFiles = new StorageFiles();
+        $this->stringProcess = new StringProcess();
     }
 
     /**

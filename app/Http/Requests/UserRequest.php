@@ -16,7 +16,6 @@ class UserRequest extends BaseRequest
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'email' => 'required|email|unique:users,email',
-            'image' => $this->imageRule(false),
         ];
         if ($this->isUpdatedRequest()){
             $RulesAll['email'] = 'required|email|unique:users,email,' . $this->user->id;

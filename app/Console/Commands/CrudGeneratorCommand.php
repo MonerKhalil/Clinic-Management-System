@@ -54,10 +54,6 @@ class CrudGeneratorCommand extends BaseCommand
             system("php artisan make:request {$model}Request");
             $this->resolveCreateRequest($model);
             $this->info('request class was created successfully');
-            #View and Composer
-            $this->createView($model,$modelAsKebab);
-            #Route
-            $this->registerRoute($model,$modelAsKebab,$typeCommand);
         }
         return self::SUCCESS;
     }
