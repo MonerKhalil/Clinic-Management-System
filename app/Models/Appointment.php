@@ -8,7 +8,7 @@ class Appointment extends BaseModel
 {
     use HasFactory;
 
-    const STATUS = ["pending","approve","reject"];
+    const STATUS = ["pending","approve","reject","expired"];
 
     protected $with = ["user","doctor"];
 
@@ -47,7 +47,7 @@ class Appointment extends BaseModel
         $checkCanFilterInSpecialty = isset($filters["specialty_name"]) && !is_null($filters["specialty_name"]);
         $checkCanFilterInSpecialtyID = isset($filters["specialty_ids"]) && is_array($filters["specialty_ids"]);
 
-        return $q->when(!$user->isAdmin() && !$user->isDoctor(),function ($q,$user){
+        return $q->when(!$user->isAdmin() && !$user->isDoctor(),function ($q)use($user){
             return $q->where("user_id",$user->id);
         })->when(!$user->isAdmin() && $user->isDoctor(),function ($q)use($user){
             return $q->where("doctor_id",$user->doctor->id);
@@ -74,5 +74,9 @@ class Appointment extends BaseModel
                     return $q_doctor;
             });
         });
+    }
+
+    public function scopeNotExpired($q,$filters){
+        return $q->whereNot("status","expired");
     }
 }

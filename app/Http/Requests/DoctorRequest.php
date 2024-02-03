@@ -14,7 +14,7 @@ class DoctorRequest extends BaseRequest
     public function rules()
     {
         return [
-            "user_id" => ["required",Rule::exists("users","id")],
+            "user_id" => ["required",Rule::exists("users","id")->where("role","doctor")],
             "name" => $this->textRule(true),
             "address" => $this->editorRule(true),
             "phone" => ["required","integer","digits:10"],

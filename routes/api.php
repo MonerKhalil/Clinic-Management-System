@@ -47,8 +47,8 @@ Route::middleware(["userCheckAuth"])->group(function (){
         Route::get("show/all/appointments","index");
 
         Route::post("change/appointment/{appointment_id}/status/{status}","changeStatusAppointments")
-            ->whereIn(["status"], Appointment::STATUS);
-        Route::post("booking/appointment/doctor/{doctor_id}","bookingAppointmentDoctor");
+            ->whereIn("status", ["pending","approve","reject",]);
+        Route::post("booking/appointment/doctor","bookingAppointmentDoctor");
         Route::post("cancel/appointment/{appointment_id}","cancelAppointment");
     });
 });

@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\MainException;
 use App\HelperClasses\MessagesFlash;
+use App\HelperClasses\MyApp;
 use App\Http\Repositories\Interfaces\IAppointmentRepository;
 use App\Http\Requests\AppointmentRequest;
-use App\Models\Appointment;
 use App\Services\AppointmentService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
@@ -35,7 +35,7 @@ class AppointmentController extends Controller
     public function index()
     {
         $data = $this->IAppointmentRepository->get(false,function ($q){
-            return $q->filter(\request()->input("filter")??[]);
+            return $q->filter(\request()->input("filter")??[])->notExpired([]);
         });
         return $this->responseSuccess(null, compact("data"));
     }
@@ -46,7 +46,7 @@ class AppointmentController extends Controller
      * @return mixed
      * @throws AuthorizationException
      */
-    public function changeStatusAppointments($status, $appointment_id){
+    public function changeStatusAppointments($appointment_id,$status){
         $appointment = $this->IAppointmentRepository->find($appointment_id);
         if (!$appointment->canEdit()){
             throw new AuthorizationException();
@@ -65,7 +65,7 @@ class AppointmentController extends Controller
     public function cancelAppointment($appointment_id){
         $appointment = $this->IAppointmentRepository->find($appointment_id);
         if (!$appointment->canCancel()){
-            throw new AuthorizationException();
+            throw new AuthorizationException("This action is unauthorized. || Appointment status is not pending.");
         }
         $appointment->delete();
         return $this->responseSuccess(null,null,MessagesFlash::Messages("delete"));
@@ -82,9 +82,9 @@ class AppointmentController extends Controller
         if (!isset($data["user_id"])){
             $data["user_id"] = user()->id;
         }
+        $data["date"] = MyApp::Classes()->stringProcess->DateFormat($data["date"]);
         $service->canBookingDoctor($data,$this->IAppointmentRepository);
-        $result = $this->IAppointmentRepository->create($request->validated());
-
+        $result = $this->IAppointmentRepository->create($data);
         return $this->responseSuccess(null, compact("result"));
     }
 

@@ -20,6 +20,8 @@ class Specialty extends BaseModel
         "is_active","created_by","updated_by","notes",
     ];
 
+    protected $hidden = ["pivot"];
+
     public function doctors(){
         return $this->belongsToMany(Doctor::class,"specialty_doctors");
     }

@@ -24,7 +24,7 @@ class Doctor extends BaseModel
     }
 
     public function specialties(){
-        return $this->belongsToMany(Specialty::class,"specialty_doctors");
+        return $this->belongsToMany(Specialty::class,"specialty_doctors")->withTimestamps();
     }
 
     public function specialties_pivot(){

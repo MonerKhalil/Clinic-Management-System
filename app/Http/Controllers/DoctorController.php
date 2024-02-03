@@ -65,9 +65,7 @@ class DoctorController extends Controller
         $specialties = $this->ISpecialtyRepository->all();
 
         $users = $this->IUserRepository->all(function ($q){
-            return $q->whereHas("doctor",function ($q){
-                return $q->whereNull("user_id");
-            });
+            return $q->nonDoctor()->where("role","doctor");
         });
 
         return $this->responseSuccess(null,compact("users","specialties"));
@@ -82,7 +80,7 @@ class DoctorController extends Controller
      */
     public function store(DoctorRequest $request)
     {
-        if (is_null($this->IUserRepository->find($request->user_id,null,"user_id",false))){
+        if (is_null($this->IDoctorRepository->find($request->user_id,null,"user_id",false))){
             try {
                 DB::beginTransaction();
                 $result = $this->IDoctorRepository->create(Arr::except($request->validated(),["specialties_ids"]));

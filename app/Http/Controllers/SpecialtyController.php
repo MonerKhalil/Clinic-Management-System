@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\MainException;
+use App\Http\Repositories\Interfaces\IDoctorRepository;
 use App\Http\Repositories\Interfaces\ISpecialtyRepository;
 use App\Http\Requests\SpecialtyRequest;
 use App\Models\Specialty;
@@ -20,9 +21,10 @@ class SpecialtyController extends Controller
      */
     public $IDoctorRepository;
 
-    public function __construct(ISpecialtyRepository $ISpecialtyRepository)
+    public function __construct(ISpecialtyRepository $ISpecialtyRepository,IDoctorRepository $IDoctorRepository)
     {
         $this->ISpecialtyRepository = $ISpecialtyRepository;
+        $this->IDoctorRepository = $IDoctorRepository;
         $this->middleware("role_user:super_admin")->except(["index","show"]);
     }
 

@@ -77,4 +77,8 @@ class User extends BaseModel implements AuthenticatableContract,AuthorizableCont
     public function isAdmin(){
         return $this->role == "super_admin";
     }
+
+    public function scopeNonDoctor($query){
+        return $query->whereDoesntHave('doctor');
+    }
 }
