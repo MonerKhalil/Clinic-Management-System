@@ -6,12 +6,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\SpecialtyController;
 use App\Http\Controllers\UserController;
-use App\Models\Appointment;
 use Illuminate\Support\Facades\Route;
 
-#Can Be Filter in any route get in any tables
-#example1 in users table send filter in query params => filter[name] = "xxx" & filter[first_name] = "xxx"
-#example2 in appointments table send filter in query params => filter[status] = "pending"
+#Can Be Filter in any route get index in any tables
+#send filter in query params => filter is array === ["key1" => "value1","key2" => "value2",]
+#example1 in users table  => filter[name] = "xxx" & filter[first_name] = "xxx"
+#example2 in appointments table => filter[status] = "pending"
 
 #table doctors and appointments => added default search filter attributes in model in (function scopeFilter())
 
