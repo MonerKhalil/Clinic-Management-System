@@ -67,7 +67,9 @@ class UserController extends Controller
     {
         try {
             DB::beginTransaction();
-            $result = $this->IUserRepository->create($request->validated());
+            $data = $request->validated();
+            $data['name'] = $request->first_name . " " . $request->last_name;
+            $result = $this->IUserRepository->create($data);
             $result->attachRole($request->role);
             DB::commit();
             return $this->responseSuccess(null,  compact("result"));
@@ -118,7 +120,9 @@ class UserController extends Controller
     {
         try {
             DB::beginTransaction();
-            $result = $this->IUserRepository->update($request->validated() ,$user->id);
+            $data = $request->validated();
+            $data['name'] = $request->first_name . " " . $request->last_name;
+            $result = $this->IUserRepository->update($data ,$user->id);
             $result->syncRoles($request->role);
             DB::commit();
             return $this->responseSuccess(null,  compact("result"));
@@ -174,7 +178,7 @@ class UserController extends Controller
         ]);
         $this->IUserRepository->queryModelWithActive()->whereIn("id",$request->ids)
         ->update([
-            "password" => Hash::make(User::PASSWORD),
+            "password" => User::PASSWORD,
         ]);
         return $this->responseSuccess(null, null, null, $this->indexPage);
     }
@@ -183,6 +187,10 @@ class UserController extends Controller
 
     public function showProfileUser(){
         $user = \user();
+        if ($user->role == "doctor"){
+            $doctor = $user->doctor;
+            return $this->responseSuccess(null,compact("user","doctor"));
+        }
         return $this->responseSuccess(null,compact("user"));
     }
 
@@ -190,6 +198,8 @@ class UserController extends Controller
         $user = \user();
 
         $data = $request->validated();
+
+        $data['name'] = $request->first_name . " " . $request->last_name;
 
         $result = $this->IUserRepository->update($data ,$user->id);
 

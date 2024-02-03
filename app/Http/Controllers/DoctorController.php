@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\MainException;
 use App\Http\Repositories\Interfaces\IDoctorRepository;
+use App\Http\Repositories\Interfaces\ISpecialtyRepository;
+use App\Http\Repositories\Interfaces\IUserRepository;
 use App\Http\Requests\DoctorRequest;
 use App\Models\Doctor;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class DoctorController extends Controller
 {
@@ -16,11 +21,22 @@ class DoctorController extends Controller
     public $IDoctorRepository;
 
     /**
-     * @param  \App\Http\Repositories\Interfaces\IDoctorRepository  $IDoctorRepository
+     * @var \App\Http\Repositories\Interfaces\IUserRepository
      */
-    public function __construct(IDoctorRepository $IDoctorRepository)
+    public $IUserRepository;
+
+    /**
+     * @var \App\Http\Repositories\Interfaces\ISpecialtyRepository
+     */
+    public $ISpecialtyRepository;
+
+
+    public function __construct(IDoctorRepository $IDoctorRepository,ISpecialtyRepository $ISpecialtyRepository,
+                                IUserRepository $IUserRepository)
     {
         $this->IDoctorRepository = $IDoctorRepository;
+        $this->IUserRepository = $IUserRepository;
+        $this->ISpecialtyRepository = $ISpecialtyRepository;
     }
 
     /**
@@ -43,7 +59,11 @@ class DoctorController extends Controller
      */
     public function create()
     {
-        return $this->responseSuccess();
+        $specialties = $this->ISpecialtyRepository->all();
+
+        $users = $this->IUserRepository->all();
+
+        return $this->responseSuccess(null,compact("users","specialties"));
     }
 
     /**
@@ -55,9 +75,19 @@ class DoctorController extends Controller
      */
     public function store(DoctorRequest $request)
     {
-        $result = $this->IDoctorRepository->create($request->validated());
-
-        return $this->responseSuccess(null, compact("result"));
+        if (is_null($this->IUserRepository->find($request->user_id,null,"user_id",false))){
+            try {
+                DB::beginTransaction();
+                $result = $this->IDoctorRepository->create(Arr::except($request->validated(),["specialties_ids"]));
+                $result->specialties()->attach($request->specialties_ids);
+                DB::commit();
+                return $this->responseSuccess(null, compact("result"));
+            }catch (\Exception $exception){
+                DB::rollBack();
+                throw new MainException($exception->getMessage());
+            }
+        }
+        throw new MainException("the user_id is doctor....");
     }
 
     /**
@@ -97,9 +127,16 @@ class DoctorController extends Controller
      */
     public function update(DoctorRequest $request, Doctor $doctor)
     {
-        $result = $this->IDoctorRepository->update($request->validated() ,$doctor->id);
-
-       return $this->responseSuccess(null, compact("result"));
+        try {
+            DB::beginTransaction();
+            $result = $this->IDoctorRepository->update(Arr::except($request->validated(),["specialties_ids"]) ,$doctor->id);
+            $doctor->specialties()->sync($result->specialties_ids);
+            DB::commit();
+            return $this->responseSuccess(null, compact("result"));
+        }catch (\Exception $exception){
+            DB::rollBack();
+            throw new MainException($exception->getMessage());
+        }
     }
 
     /**

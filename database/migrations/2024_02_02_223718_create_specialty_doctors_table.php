@@ -13,12 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('doctors', function (Blueprint $table) {
+        Schema::create('specialty_doctors', function (Blueprint $table) {
             $table->id();
-            $table->foreignId("user_id")->constrained("users")->cascadeOnDelete();
-            $table->string("name");
-            $table->string("address");
-            $table->string("phone");
+            $table->foreignId("specialty_id")->constrained("specialties")->cascadeOnDelete();
+            $table->foreignId("doctor_id")->constrained("doctors")->cascadeOnDelete();
             $table->boolean("is_active")->default(true);
             $table->foreignId("created_by")->nullable()->constrained("users")->cascadeOnDelete();
             $table->foreignId("updated_by")->nullable()->constrained("users")->cascadeOnDelete();
@@ -34,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('doctors');
+        Schema::dropIfExists('specialty_doctors');
     }
 };

@@ -58,7 +58,7 @@ abstract class BaseRepository implements IBaseRepository
         $query = $this->queryModel();
         $is_active = isset(request()->filter) && is_array(request()->filter) && isset(request()->filter["is_active"]);
         $is_exist = Schema::hasColumn($this->nameTable, "is_active");
-        if (user()->role == "super_admin" && $is_exist && $is_active){
+        if (user()?->role == "super_admin" && $is_exist && $is_active){
             $query = $query->where($this->nameTable.".is_active",request()->filter["is_active"]);
         }elseif($is_exist){
             $query = $query->where($this->nameTable.".is_active",true);
@@ -136,8 +136,9 @@ abstract class BaseRepository implements IBaseRepository
             if ($showMessage){
                 MessagesFlash::Success($process);
             }
+            $newModel = $this->find($idOldModel);
             DB::commit();
-            return $oldModel;
+            return $newModel;
         }catch (Exception $exception){
             DB::rollBack();
             throw new MainException($exception->getMessage());

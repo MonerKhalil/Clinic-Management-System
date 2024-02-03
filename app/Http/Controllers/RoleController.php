@@ -20,32 +20,11 @@ class RoleController extends Controller
     public $IRoleRepository;
 
     /**
-     * @var string
-     */
-    private $indexPage = 'role.index';
-
-    /**
-     * @var string
-     */
-    private $indexView = 'pages.role.index';
-
-    /**
-     * @var string
-     */
-    private $createView = 'pages.role.create';
-
-    /**
-     * @var string
-     */
-    private $updateView = 'pages.role.update';
-
-    /**
      * @param  \App\Http\Repositories\Interfaces\IRoleRepository  $IRoleRepository
      */
     public function __construct(IRoleRepository $IRoleRepository)
     {
         $this->IRoleRepository = $IRoleRepository;
-        $this->addMiddlewarePermissionsToFunctions($this->IRoleRepository->nameTable);
     }
 
     /**
@@ -199,25 +178,6 @@ class RoleController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param $id
-     * @return \Illuminate\Http\Response
-     * @author moner khalil
-     */
-    public function forceDestroy($id)
-    {
-        try {
-           $result = $this->IRoleRepository->forceDelete($id);
-
-           return $this->responseSuccess(null, null, null, $this->indexPage);
-
-        } catch (\Exception $e) {
-          throw new MainException($e->getMessage());
-        }
-    }
-
-    /**
      * active multi ids Records Table.
      *
      * @return \Illuminate\Http\Response
@@ -228,80 +188,6 @@ class RoleController extends Controller
        $result = $this->IRoleRepository->active($id);
 
        return $this->responseSuccess(null, null, null, $this->indexPage);
-    }
-
-    /**
-     * active multi ids Records Table.
-     *
-     * @return \Illuminate\Http\Response
-     * @author moner khalil
-     */
-    public function activeRow($id)
-    {
-        $result = $this->IRoleRepository->activeRow($id);
-
-        return $this->responseSuccess(null, null, null, $this->indexPage);
-    }
-
-    /**
-     * active multi ids Records Table.
-     *
-     * @return \Illuminate\Http\Response
-     * @author moner khalil
-     */
-    public function deactivateRow($id)
-    {
-        $result = $this->IRoleRepository->deactivateRow($id);
-
-        return $this->responseSuccess(null, null, null, $this->indexPage);
-    }
-
-    /**
-     * active multi ids Records Table.
-     *
-     * @return \Illuminate\Http\Response
-     * @author moner khalil
-     */
-    public function activeMulti(Request $request)
-    {
-        $result = $this->IRoleRepository->activeMulti($request);
-
-        return $this->responseSuccess(null, null, null, $this->indexPage);
-    }
-
-    /**
-     * export all Records Table Xlsx.
-     *
-     * @return \Illuminate\Http\Response
-     * @author moner khalil
-     */
-    public function exportXLSX(Request $request)
-    {
-        return $this->IRoleRepository->exportXLSX($request);
-    }
-
-    /**
-     * export all Records Table PDF.
-     *
-     * @return \Illuminate\Http\Response
-     * @author moner khalil
-     */
-    public function exportPDF(Request $request)
-    {
-        return $this->IRoleRepository->exportPDF($request);
-    }
-
-    /**
-     * import file Table.
-     *
-     * @return \Illuminate\Http\Response
-     * @author moner khalil
-     */
-    public function import(Request $request)
-    {
-        $result = $this->IRoleRepository->import($request);
-
-        return $this->responseSuccess(null, null, null, $this->indexPage);
     }
 
     /**

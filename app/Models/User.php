@@ -21,7 +21,9 @@ class User extends BaseModel implements AuthenticatableContract,AuthorizableCont
     use Authenticatable, Authorizable, CanResetPassword, MustVerifyEmail;
     use HasApiTokens, HasFactory, Notifiable;
 
-    public const PASSWORD = "P@ssw0rd@111@";
+    public const PASSWORD = "123123123";
+
+    protected $with = ["doctor"];
 
     /**
      * The attributes that are mass assignable.
@@ -60,7 +62,19 @@ class User extends BaseModel implements AuthenticatableContract,AuthorizableCont
         $this->attributes['password'] = Hash::make($password);
     }
 
-    public function setNameAttribute($value){
-        $this->attributes['name'] = $this->first_name . ' ' . $this->last_name;
+    public function doctor(){
+        return $this->hasOne(Doctor::class,"user_id","id");
+    }
+
+    public function appointments(){
+        return $this->hasMany(Appointment::class,"user_id");
+    }
+
+    public function isDoctor(){
+        return !is_null($this->doctor()->first());
+    }
+
+    public function isAdmin(){
+        return $this->role == "super_admin";
     }
 }

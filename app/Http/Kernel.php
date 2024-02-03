@@ -2,13 +2,9 @@
 
 namespace App\Http;
 
-use App\Http\Middleware\IsActive;
-use App\Http\Middleware\IsVerify;
-use App\Http\Middleware\Localization;
+use App\Http\Middleware\RoleUser;
 use App\Http\Middleware\userCheckAuth;
-use App\Http\Middleware\XSS;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
-use Laratrust\Middleware\LaratrustRole;
 
 class Kernel extends HttpKernel
 {
@@ -70,6 +66,6 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'userCheckAuth' => userCheckAuth::class,
-        'role' => LaratrustRole::class,
+        'role_user' => RoleUser::class,
     ];
 }

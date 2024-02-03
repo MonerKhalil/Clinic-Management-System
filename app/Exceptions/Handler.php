@@ -11,6 +11,7 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
@@ -58,17 +59,16 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->renderable(function (Throwable $e) {
-            if (!urlIsApi() && !request()->ajax()){
-                dd($e);
-            }
+            dd($e);
+
             if ($e instanceof MainException){
                 return $this->responseError($e->getMessage(),"MainException");
             }
             if ($e instanceof ValidationException) {
                 return $this->responseError($e->errors(),"ValidationException");
             }
-            if ($e instanceof AuthorizationException){
-                return $this->responseError($e->getMessage(),"AuthorizationException",true,null,null,500);
+            if ($e instanceof AuthorizationException || $e instanceof HttpException){
+                return $this->responseError($e->getMessage(),"AuthorizationException",true,null,null,403);
             }
             if ($e instanceof AuthenticationException) {
                 return $this->responseError($e->getMessage(),"AuthenticationException",false,null,"login");
@@ -82,6 +82,7 @@ class Handler extends ExceptionHandler
             if ($e instanceof AccessDeniedHttpException){
                 return $this->responseError($e->getMessage(),"AccessDeniedHttpException",false,self::Page_500,null,500);
             }
+            return $this->responseError($e->getMessage(),"MainException",false,self::Page_500,null,500);
         });
     }
 }

@@ -3,8 +3,6 @@
 namespace App\Http\Requests;
 
 use App\HelperClasses\MyApp;
-use App\HelperClasses\StorageFiles;
-use App\Models\Setting;
 use App\Rules\FileMediaRule;
 use App\Rules\TextRule;
 use Illuminate\Foundation\Http\FormRequest;

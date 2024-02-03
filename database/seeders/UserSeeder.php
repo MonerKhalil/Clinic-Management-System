@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\HelperClasses\MyApp;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,9 +22,9 @@ class UserSeeder extends Seeder
             'first_name' => 'super',
             'last_name' => 'admin',
             'email' => 'super_admin@admin.com',
-            'password' => Hash::make("123123123"),
+            'password' => User::PASSWORD,
             'role' => 'super_admin',
-            'png_image' => null,
+            'image' => null,
             'email_verified_at' => now(),
             'created_at' => now()
         ]);
