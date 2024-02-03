@@ -23,7 +23,7 @@ class User extends BaseModel implements AuthenticatableContract,AuthorizableCont
 
     public const PASSWORD = "123123123";
 
-    protected $with = ["doctor"];
+    protected $with = [];
 
     /**
      * The attributes that are mass assignable.
@@ -31,7 +31,7 @@ class User extends BaseModel implements AuthenticatableContract,AuthorizableCont
      * @var array<int, string>
      */
     protected $fillable = [
-        'first_name','last_name',
+        'name','first_name','last_name',
         'role','is_active','created_by','updated_by',
         'token_reset_password_api',
         'email','email_verified_at',
@@ -45,7 +45,7 @@ class User extends BaseModel implements AuthenticatableContract,AuthorizableCont
      */
     protected $hidden = [
         'password','pivot',
-        'remember_token',
+        'remember_token','token_reset_password_api',
     ];
 
     /**

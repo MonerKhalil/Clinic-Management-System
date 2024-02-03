@@ -59,7 +59,7 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->renderable(function (Throwable $e) {
-            dd($e);
+//            dd($e);
 
             if ($e instanceof MainException){
                 return $this->responseError($e->getMessage(),"MainException");
@@ -67,14 +67,14 @@ class Handler extends ExceptionHandler
             if ($e instanceof ValidationException) {
                 return $this->responseError($e->errors(),"ValidationException");
             }
-            if ($e instanceof AuthorizationException || $e instanceof HttpException){
+            if ($e instanceof AuthorizationException){
                 return $this->responseError($e->getMessage(),"AuthorizationException",true,null,null,403);
             }
             if ($e instanceof AuthenticationException) {
                 return $this->responseError($e->getMessage(),"AuthenticationException",false,null,"login");
             }
             if ($e instanceof NotFoundHttpException || $e instanceof ModelNotFoundException){
-                return $this->responseError($e->getMessage(),"NotFoundHttpException",false,self::Page_404,null,404);
+                return $this->responseError("Not Found 404 -_-.","NotFoundHttpException",false,self::Page_404,null,404);
             }
             if ($e instanceof MethodNotAllowedHttpException){
                 return $this->responseError($e->getMessage(),"MethodNotAllowedHttpException",false,self::Page_404,null,404);

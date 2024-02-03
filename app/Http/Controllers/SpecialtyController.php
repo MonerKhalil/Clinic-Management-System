@@ -16,11 +16,14 @@ class SpecialtyController extends Controller
     public $ISpecialtyRepository;
 
     /**
-     * @param  \App\Http\Repositories\Interfaces\ISpecialtyRepository  $ISpecialtyRepository
+     * @var \App\Http\Repositories\Interfaces\IDoctorRepository
      */
+    public $IDoctorRepository;
+
     public function __construct(ISpecialtyRepository $ISpecialtyRepository)
     {
         $this->ISpecialtyRepository = $ISpecialtyRepository;
+        $this->middleware("role_user:super_admin")->except(["index","show"]);
     }
 
     /**
@@ -71,7 +74,13 @@ class SpecialtyController extends Controller
     {
         $dataShow = $this->ISpecialtyRepository->find($specialty->id);
 
-        return $this->responseSuccess(null, compact("dataShow"));
+        $doctors = $this->IDoctorRepository->get(false,function ($q)use($dataShow){
+            return $q->whereHas("specialties_pivot",function ($q)use($dataShow){
+                $q->where("specialty_id",$dataShow->id);
+            });
+        });
+
+        return $this->responseSuccess(null, compact("dataShow","doctors"));
     }
 
     /**

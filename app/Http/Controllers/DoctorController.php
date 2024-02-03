@@ -37,6 +37,7 @@ class DoctorController extends Controller
         $this->IDoctorRepository = $IDoctorRepository;
         $this->IUserRepository = $IUserRepository;
         $this->ISpecialtyRepository = $ISpecialtyRepository;
+        $this->middleware("role_user:super_admin")->except(["index","show"]);
     }
 
     /**
@@ -47,7 +48,9 @@ class DoctorController extends Controller
      */
     public function index()
     {
-        $data = $this->IDoctorRepository->get();
+        $data = $this->IDoctorRepository->get(false,function ($q){
+            return $q->filter(\request()->input("filter")??[]);
+        });
 
         return $this->responseSuccess(null, compact("data"));
     }
@@ -61,7 +64,11 @@ class DoctorController extends Controller
     {
         $specialties = $this->ISpecialtyRepository->all();
 
-        $users = $this->IUserRepository->all();
+        $users = $this->IUserRepository->all(function ($q){
+            return $q->whereHas("doctor",function ($q){
+                return $q->whereNull("user_id");
+            });
+        });
 
         return $this->responseSuccess(null,compact("users","specialties"));
     }
@@ -99,7 +106,9 @@ class DoctorController extends Controller
      */
     public function show(Doctor $doctor)
     {
-        $dataShow = $this->IDoctorRepository->find($doctor->id);
+        $dataShow = $this->IDoctorRepository->find($doctor->id,function ($q){
+            return $q->with("specialties");
+        });
 
         return $this->responseSuccess(null, compact("dataShow"));
     }

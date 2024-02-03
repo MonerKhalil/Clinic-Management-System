@@ -19,6 +19,8 @@ class UserRequest extends BaseRequest
         ];
         if ($this->isUpdatedRequest()){
             $RulesAll['email'] = 'required|email|unique:users,email,' . $this->user->id;
+        }else{
+            $RulesAll['password'] = ['required', self::validationPassword()];
         }
         return $RulesAll;
     }

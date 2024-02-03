@@ -18,7 +18,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId("doctor_id")->constrained("doctors")->cascadeOnDelete();
             $table->foreignId("user_id")->constrained("users")->cascadeOnDelete();
-            $table->dateTime("time");
+            $table->date("date");
+            $table->time("time");
             $table->enum("status", Appointment::STATUS)->default("pending");
             $table->boolean("is_active")->default(true);
             $table->foreignId("created_by")->nullable()->constrained("users")->cascadeOnDelete();

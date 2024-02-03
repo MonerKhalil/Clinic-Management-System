@@ -17,17 +17,44 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        $user = User::create([
-            'name' => 'super_admin',
-            'first_name' => 'super',
-            'last_name' => 'admin',
-            'email' => 'super_admin@admin.com',
-            'password' => User::PASSWORD,
-            'role' => 'super_admin',
-            'image' => null,
-            'email_verified_at' => now(),
-            'created_at' => now()
-        ]);
-        $user->attachRole($user->role);
+        $users = [
+            [
+                'name' => 'super_admin',
+                'first_name' => 'super',
+                'last_name' => 'admin',
+                'email' => 'super_admin@admin.com',
+                'password' => User::PASSWORD,
+                'role' => 'super_admin',
+                'image' => null,
+                'email_verified_at' => now(),
+                'created_at' => now()
+            ],
+            [
+                'name' => 'moner_khalil',
+                'first_name' => 'moner',
+                'last_name' => 'khalil',
+                'email' => 'moner_khalil@user.com',
+                'password' => User::PASSWORD,
+                'role' => 'user',
+                'image' => null,
+                'email_verified_at' => now(),
+                'created_at' => now()
+            ],
+            [
+                'name' => 'moner_khalil1',
+                'first_name' => 'moner',
+                'last_name' => 'khalil1',
+                'email' => 'moner_khalil1@user.com',
+                'password' => User::PASSWORD,
+                'role' => 'user',
+                'image' => null,
+                'email_verified_at' => now(),
+                'created_at' => now()
+            ],
+        ];
+        foreach ($users as $user){
+            $user = User::create($user);
+            $user->attachRole($user->role);
+        }
     }
 }

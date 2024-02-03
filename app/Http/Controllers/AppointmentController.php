@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\MainException;
+use App\HelperClasses\MessagesFlash;
 use App\Http\Repositories\Interfaces\IAppointmentRepository;
 use App\Http\Requests\AppointmentRequest;
 use App\Models\Appointment;
+use App\Services\AppointmentService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
@@ -31,113 +34,58 @@ class AppointmentController extends Controller
      */
     public function index()
     {
-        $data = $this->IAppointmentRepository->get();
-
+        $data = $this->IAppointmentRepository->get(false,function ($q){
+            return $q->filter(\request()->input("filter")??[]);
+        });
         return $this->responseSuccess(null, compact("data"));
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @param $status
+     * @param $appointment_id
+     * @return mixed
+     * @throws AuthorizationException
      */
-    public function create()
-    {
-        return $this->responseSuccess();
+    public function changeStatusAppointments($status, $appointment_id){
+        $appointment = $this->IAppointmentRepository->find($appointment_id);
+        if (!$appointment->canEdit()){
+            throw new AuthorizationException();
+        }
+        $appointment->update([
+            "status" => $status,
+        ]);
+        return $this->responseSuccess(null,null,MessagesFlash::Messages("default"));
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     * @author moner khalil
+     * @param $appointment_id
+     * @return mixed
+     * @throws AuthorizationException
      */
-    public function store(AppointmentRequest $request)
-    {
+    public function cancelAppointment($appointment_id){
+        $appointment = $this->IAppointmentRepository->find($appointment_id);
+        if (!$appointment->canCancel()){
+            throw new AuthorizationException();
+        }
+        $appointment->delete();
+        return $this->responseSuccess(null,null,MessagesFlash::Messages("delete"));
+    }
+
+    /**
+     * @param AppointmentRequest $request
+     * @param AppointmentService $service
+     * @return mixed
+     * @throws MainException
+     */
+    public function bookingAppointmentDoctor(AppointmentRequest $request, AppointmentService $service){
+        $data = $request->validated();
+        if (!isset($data["user_id"])){
+            $data["user_id"] = user()->id;
+        }
+        $service->canBookingDoctor($data,$this->IAppointmentRepository);
         $result = $this->IAppointmentRepository->create($request->validated());
 
         return $this->responseSuccess(null, compact("result"));
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Appointment  $appointment
-     * @return \Illuminate\Http\Response
-     * @author moner khalil
-     */
-    public function show(Appointment $appointment)
-    {
-        $dataShow = $this->IAppointmentRepository->find($appointment->id);
-
-        return $this->responseSuccess(null, compact("dataShow"));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Appointment  $appointment
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Appointment $appointment)
-    {
-        $data = $this->IAppointmentRepository->find($appointment->id);
-
-         return $this->responseSuccess(null, compact("data"));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Appointment  $appointment
-     * @return \Illuminate\Http\Response
-     * @author moner khalil
-     */
-    public function update(AppointmentRequest $request, Appointment $appointment)
-    {
-        $result = $this->IAppointmentRepository->update($request->validated() ,$appointment->id);
-
-       return $this->responseSuccess(null, compact("result"));
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Appointment  $appointment
-     * @return \Illuminate\Http\Response
-     * @author moner khalil
-     */
-    public function destroy(Appointment $appointment)
-    {
-        $result = $this->IAppointmentRepository->delete($appointment->id);
-
-        return $this->responseSuccess();
-    }
-
-    /**
-     * active id Records Table.
-     *
-     * @return \Illuminate\Http\Response
-     * @author moner khalil
-     */
-    public function active($id)
-    {
-       $result = $this->IAppointmentRepository->active($id);
-
-       return $this->responseSuccess();
-    }
-
-    /**
-     * delete multi ids Records Table.
-     *
-     * @return \Illuminate\Http\Response
-     * @author moner khalil
-     */
-    public function multiDestroy(Request $request){
-        $result = $this->IAppointmentRepository->multiDestroy($request);
-
-        return $this->responseSuccess();
-    }
 }

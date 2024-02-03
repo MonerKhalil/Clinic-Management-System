@@ -8,9 +8,11 @@ use App\HelperClasses\MyApp;
 use App\Http\Repositories\Interfaces\IBaseRepository;
 use Exception;
 use Illuminate\Container\Container as App;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 abstract class BaseRepository implements IBaseRepository
 {
@@ -78,7 +80,7 @@ abstract class BaseRepository implements IBaseRepository
         if (!is_null($callback)){
             $queryBuilder =  $callback($queryBuilder);
         }
-        return $queryBuilder->orderBy($this->getOrderColumn($columnOrder),$order)->get();
+        return $queryBuilder->orderBy($columnOrder ?? "updated_at",$order)->get();
     }
 
     /**
@@ -150,11 +152,12 @@ abstract class BaseRepository implements IBaseRepository
      * @param callable|null $callback
      * @param string $key
      * @param bool $withFail
+     * @param bool $withActive
      * @return mixed
      * @author moner khalil
      */
-    public function find($value, callable $callback = null, string $key = "id",bool $withFail = true): mixed{
-        $query = $this->queryModelWithActive();
+    public function find($value, callable $callback = null, string $key = "id",bool $withFail = true,bool $withActive = true): mixed{
+        $query = $withActive ? $this->queryModelWithActive() : $this->queryModel();
         $query = $query->where($key,$value);
         if (!is_null($callback)){
             $query = $callback($query);
@@ -183,6 +186,9 @@ abstract class BaseRepository implements IBaseRepository
             return true;
         }catch (Exception $exception){
             DB::rollBack();
+            if ($exception instanceof NotFoundHttpException || $exception instanceof ModelNotFoundException){
+                throw new ModelNotFoundException();
+            }
             throw new MainException($exception->getMessage());
         }
     }
@@ -203,7 +209,7 @@ abstract class BaseRepository implements IBaseRepository
         try {
             DB::beginTransaction();
             $process = "delete";
-            $oldModel = $this->queryModelWithActive()->whereIn("id",$request->ids);
+            $oldModel = $this->queryModel()->whereIn("id",$request->ids);
             if (!is_null($callbackWhere)){
                 $oldModel = $callbackWhere($oldModel);
             }
@@ -231,15 +237,18 @@ abstract class BaseRepository implements IBaseRepository
     {
         try {
             $process = "update";
-            $oldModel = $this->find($idModel,null,"id",true);
+            $oldModel = $this->find($idModel,null,"id",true,false);
             $oldModel->update(['is_active' => !$oldModel->is_active,]);
             MyApp::Classes()->logMain->logProcess($process,$oldModel);
             if ($showMessage){
                 MessagesFlash::Success($process);
             }
             return true;
-        }catch (Exception $exception){
-            throw new MainException($exception->getMessage());
+        }catch (Exception $e){
+            if ($e instanceof NotFoundHttpException || $e instanceof ModelNotFoundException){
+                throw new ModelNotFoundException();
+            }
+            throw new MainException($e->getMessage());
         }
     }
 }

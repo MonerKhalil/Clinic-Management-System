@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\MainException;
+use App\HelperClasses\MessagesFlash;
 use App\HelperClasses\MyApp;
 use App\Http\Repositories\Interfaces\IRoleRepository;
 use App\Http\Repositories\Interfaces\IUserRepository;
@@ -123,7 +124,7 @@ class UserController extends Controller
             $data = $request->validated();
             $data['name'] = $request->first_name . " " . $request->last_name;
             $result = $this->IUserRepository->update($data ,$user->id);
-            $result->syncRoles($request->role);
+            $result->syncRoles([$request->role]);
             DB::commit();
             return $this->responseSuccess(null,  compact("result"));
         }catch (\Exception $exception){
@@ -176,11 +177,11 @@ class UserController extends Controller
             "ids" => ["required","array"],
             "ids.*" => ["required",Rule::exists("users","id")],
         ]);
-        $this->IUserRepository->queryModelWithActive()->whereIn("id",$request->ids)
+        $this->IUserRepository->queryModel()->whereIn("id",$request->ids)
         ->update([
-            "password" => User::PASSWORD,
+            "password" => Hash::make(User::PASSWORD),
         ]);
-        return $this->responseSuccess(null, null, null, $this->indexPage);
+        return $this->responseSuccess(null, null, MessagesFlash::Messages("default"));
     }
 
     ######################### PROFILE USER #########################

@@ -27,8 +27,31 @@ class Doctor extends BaseModel
         return $this->belongsToMany(Specialty::class,"specialty_doctors");
     }
 
+    public function specialties_pivot(){
+        return $this->hasMany(SpecialtyDoctor::class,"doctor_id");
+    }
+
     public function appointments(){
         return $this->hasMany(Appointment::class,"doctor_id");
+    }
+
+    public function scopeFilter($q,$filters){
+        $checkCanFilterInSpecialty = isset($filters["specialty_name"]) && !is_null($filters["specialty_name"]);
+        $checkCanFilterInSpecialtyID = isset($filters["specialty_ids"]) && is_array($filters["specialty_ids"]);
+        return $q->when($checkCanFilterInSpecialty||$checkCanFilterInSpecialtyID,
+            function ($q_specialty)use($filters,$checkCanFilterInSpecialty,$checkCanFilterInSpecialtyID){
+                if ($checkCanFilterInSpecialty){
+                    $q_specialty = $q_specialty->whereHas("specialties",function ($q)use($filters){
+                        return $q->where("name","LIKE",$filters['specialty_name']."%");
+                    });
+                }
+                if ($checkCanFilterInSpecialtyID){
+                    $q_specialty = $q_specialty->whereHas("specialties_pivot",function ($q)use($filters){
+                        return $q->whereIn("id",$filters["specialty_ids"]);
+                    });
+                }
+                return $q_specialty;
+        });
     }
 
 }
